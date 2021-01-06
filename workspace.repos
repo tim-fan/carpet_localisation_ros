@@ -1,4 +1,8 @@
 repositories:
+  carpet_localisation:
+    type: git
+    url: git@github.com:tim-fan/carpet_localisation_ros.git
+    version: main
   create_robot:
     type: git
     url: https://github.com/AutonomyLab/create_robot.git
