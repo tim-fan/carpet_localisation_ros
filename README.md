@@ -48,5 +48,7 @@ You should see a gazebo world like the following:
 
 ![carpet world](doc/carpet_world.png)
 
+If you have an xbox-style controller connected, you will be able to drive the simulated carpet robot around the environment.
+
 ### TODO
 * Finish the actual integration with [carpet localisation](https://github.com/tim-fan/carpet_localisation) and document/demo.

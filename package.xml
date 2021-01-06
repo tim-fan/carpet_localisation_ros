@@ -5,12 +5,16 @@
   <description>The carpet_localisation package</description>
   <maintainer email="tim@todo.todo">tim</maintainer>
   <license>TODO</license>
+
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>catkin_virtualenv</build_depend>
   <build_depend>message_generation</build_depend>
+  
   <exec_depend>gazebo_ros</exec_depend>
   <exec_depend>create_description</exec_depend>
   <exec_depend>message_runtime</exec_depend>
+  <exec_depend>teleop_twist_joy</exec_depend>
+  
   <export>
     <gazebo_ros gazebo_model_path="${prefix}/gazebo/models" />
     <gazebo_ros gazebo_media_path="${prefix}/gazebo/models" />

@@ -7,5 +7,8 @@
 
   <!-- Spawn the robot into Gazebo -->
   <param name="robot_description" command="xacro $(find carpet_localisation)/gazebo/urdf/carpet_bot.urdf.xacro" />
-  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model pr2" />
+  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model carpet_bot" />
+
+  <!-- launch teleop via xbox controller -->
+  <include file="$(find carpet_localisation)/launch/include/gz_carpet_bot_teleop.launch" />
 </launch>
