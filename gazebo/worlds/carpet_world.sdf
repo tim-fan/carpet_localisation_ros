@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<sdf version='1.7'>
+  <world name='carpet world'>
+    <include>
+      <uri>model://carpet</uri>
+    </include>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+  </world>
+</sdf>

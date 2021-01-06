@@ -1,0 +1,2 @@
+git+https://github.com/tim-fan/carpet_color_classification.git
+git+https://github.com/tim-fan/carpet_localisation.git

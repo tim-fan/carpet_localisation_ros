@@ -1,0 +1,3 @@
+Header header
+uint8 color_index
+string color_name

@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- launch a carpet simulation world and spawn a robot capable of carpet localisation -->
+
+  <!-- launch carpet world -->
+  <include file="$(find carpet_localisation)/launch/include/carpet_world.launch" />
+
+  <!-- Spawn the robot into Gazebo -->
+  <param name="robot_description" command="xacro $(find carpet_localisation)/gazebo/urdf/carpet_bot.urdf.xacro" />
+  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model pr2" />
+</launch>
