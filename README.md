@@ -49,4 +49,4 @@ You should see a gazebo world like the following:
 ![carpet world](doc/carpet_world.png)
 
 ### TODO
-* Finish the actual integration with [carpet simulation](https://github.com/tim-fan/carpet_localisation) and document/demo.
+* Finish the actual integration with [carpet localisation](https://github.com/tim-fan/carpet_localisation) and document/demo.
