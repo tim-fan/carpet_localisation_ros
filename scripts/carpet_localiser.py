@@ -9,8 +9,8 @@ from cv_bridge import CvBridge
 import message_filters
 from tf.transformations import euler_from_quaternion
 from carpet_color_classification import CarpetColorClassifier
-from cbl_particle_filter.filter import CarpetBasedParticleFilter, Pose, OdomMeasurement, ColorMeasurement, load_map_from_png
-
+from cbl_particle_filter.filter import CarpetBasedParticleFilter, Pose, OdomMeasurement, ColorMeasurement
+from cbl_particle_filter.carpet_map import load_map_from_png
 
 def odom_msg_to_measurement(odom_msg:Odometry) -> OdomMeasurement:
     """
@@ -55,12 +55,19 @@ class CarpetLocaliser():
             log_inputs=False):
 
         self.color_classifier = CarpetColorClassifier(classifier_param_file)
+        self.log_inputs = log_inputs
 
         carpet = load_map_from_png(map_png_file, map_cell_size)
 
         self.particle_filter = CarpetBasedParticleFilter(carpet, log_inputs)
         self.cv_bridge = CvBridge()
         self.previous_odom = None
+
+    def __del__(self):
+        if self.log_inputs:
+            log_path = "/tmp/localiser_input_log.pickle"
+            self.particle_filter.write_input_log(log_path)  
+            rospy.loginfo(f"Saved localiser input log to {log_path}")
 
 
     def localisation_update(self, odom_msg:Odometry, img_msg:Image):
@@ -100,18 +107,20 @@ def run_localisation():
     rospy.init_node("carpet_localisation")
     rospy.loginfo("initialised")
 
+    map_png_file = rospy.get_param("~map_png_file")
+    map_cell_size = rospy.get_param("~map_cell_size")
     classifier_param_file = rospy.get_param("~classifier_param_file")
 
     # param 'log_inputs': set true to record all inputs to the particle filter
     # as a pickle file, for later offline playback
     log_inputs = rospy.get_param("~log_inputs", default=False)
 
-    localiser = CarpetLocaliser(classifier_param_file, log_inputs)
+    localiser = CarpetLocaliser(map_png_file, map_cell_size, classifier_param_file, log_inputs)
 
     odom_sub = message_filters.Subscriber('odom', Odometry)
-    penalty_sub = message_filters.Subscriber('image', Image)
+    image_sub = message_filters.Subscriber('image', Image)
 
-    time_synchronizer = message_filters.ApproximateTimeSynchronizer([odom_sub, penalty_sub], 10, 0.2)
+    time_synchronizer = message_filters.ApproximateTimeSynchronizer([odom_sub, image_sub], 10, 0.2)
     time_synchronizer.registerCallback(localiser.localisation_update)
 
 
@@ -125,27 +134,9 @@ def run_localisation():
     except KeyboardInterrupt:
         print("INTERRUPT!")
 
-    del localiser    
+    del localiser
     print("DONE!")
     
 
 if __name__ == '__main__':
     run_localisation()
-
-
-
-# def talker():
-#     pub = rospy.Publisher('chatter', String, queue_size=10)
-#     rospy.init_node('talker', anonymous=True)
-#     rate = rospy.Rate(10) # 10hz
-#     while not rospy.is_shutdown():
-#         hello_str = "hello world %s" % rospy.get_time()
-#         rospy.loginfo(hello_str)
-#         pub.publish(hello_str)
-#         rate.sleep()
-
-# if __name__ == '__main__':
-#     try:
-#         talker()
-#     except rospy.ROSInterruptException:
-#         pass
