@@ -9,7 +9,7 @@ from cv_bridge import CvBridge
 import message_filters
 from tf.transformations import euler_from_quaternion
 from carpet_color_classification import CarpetColorClassifier
-from cbl_particle_filter.filter import CarpetBasedParticleFilter, Pose, OdomMeasurement, ColorMeasurement
+from cbl_particle_filter.filter import CarpetBasedParticleFilter, Pose, OdomMeasurement, ColorMeasurement, load_map_from_png
 
 
 def odom_msg_to_measurement(odom_msg:Odometry) -> OdomMeasurement:
@@ -47,31 +47,21 @@ class CarpetLocaliser():
     Interface between incoming ROS messages (odom and camera image) and
     carpet based particle filter.
     """
-    def __init__(self, classifier_param_file:str, log_inputs=False):
+    def __init__(
+            self,
+            map_png_file:str,
+            map_cell_size:float,
+            classifier_param_file:str,
+            log_inputs=False):
+
         self.color_classifier = CarpetColorClassifier(classifier_param_file)
 
-        # load map
-        # for now, using a randomly generated map
-        # TODO: map saving/loading
-        shape = (40, 40)
-        cell_size = 0.5
-        n_colors = 4
-        np.random.seed(123)
-        from cbl_particle_filter.carpet_map import generate_random_map
-        carpet = generate_random_map(shape, cell_size, n_colors)
+        carpet = load_map_from_png(map_png_file, map_cell_size)
 
-        self.particle_filter = CarpetBasedParticleFilter(carpet)
+        self.particle_filter = CarpetBasedParticleFilter(carpet, log_inputs)
         self.cv_bridge = CvBridge()
-        self.log_inputs = log_inputs
-        self.input_log = []
         self.previous_odom = None
 
-    def __del__(self):
-        if self.log_inputs:
-            log_path = '/tmp/carpet_localisation_inputs.pickle'
-            with open(log_path, 'wb') as f:
-                pickle.dump(self.input_log, f, protocol=pickle.HIGHEST_PROTOCOL)
-            rospy.loginfo(f"Saved input log to '{log_path}'")
 
     def localisation_update(self, odom_msg:Odometry, img_msg:Image):
         """
@@ -91,8 +81,6 @@ class CarpetLocaliser():
 
         self.particle_filter.update(odom_delta, color_measurement)
 
-        if self.log_inputs:
-            self.input_log.append((odom_delta, color_measurement))
 
 
     def _classify_image_color(self, img_msg:Image) -> Tuple[ColorMeasurement, str]:
