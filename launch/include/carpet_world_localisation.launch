@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- run localisation node parameterised for carpet simulation world -->
+  <arg name="log_inputs" default="false" doc="set true to record particle filter inputs for offline playback" />
+  <node name="carpet_localisation" pkg="carpet_localisation" type="carpet_localiser.py" output="screen">
+    <param name="map_png_file" value="$(find carpet_localisation)/gazebo/models/carpet/materials/textures/Carpet.png" />
+    <param name="map_cell_size" value="0.5" />
+    <param name="classifier_param_file" value="$(find carpet_localisation)/gazebo/carpet_world_gmm_model/gmm_params.json" />
+    <param name="log_inputs" value="$(arg log_inputs)" />
+    <remap from="image" to="/carpet_cam/image_raw" />
+  </node>
+</launch>
