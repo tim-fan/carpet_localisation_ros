@@ -50,5 +50,14 @@ You should see a gazebo world like the following:
 
 If you have an xbox-style controller connected, you will be able to drive the simulated carpet robot around the environment.
 
+TODO: launch localisation and RViz
+
 ### TODO
-* Finish the actual integration with [carpet localisation](https://github.com/tim-fan/carpet_localisation) and document/demo.
+* publish map-> odom tf (use fake localisation?)
+* find a better way of determining current pose from particle cloud (mean is biased by outliers. MAP? clustering?)
+* visualise map in rviz (try [textured quads?](https://github.com/MohitShridhar/rviz_textured_quads) or [polygon array?](https://jsk-visualization.readthedocs.io/en/latest/jsk_rviz_plugins/plugins/polygon_array.html) )
+* support particle filter seed/reset
+* realworld test
+* expose particle filter config params (n_particles, noise params, update thresholds)
+* dynamic reconfigure support
+* parameter optimisation (w.r.t accuracy to ground truth in gazebo)
