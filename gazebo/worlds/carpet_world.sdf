@@ -7,5 +7,15 @@
     <include>
       <uri>model://sun</uri>
     </include>
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose>10 10 25 0 1.57079632679 1.57079632679</pose>
+        <view_controller>ortho</view_controller>
+        <projection_type>orthographic</projection_type>
+      </camera>
+    </gui>
+    <scene>
+      <grid>0</grid>
+    </scene>
   </world>
 </sdf>
