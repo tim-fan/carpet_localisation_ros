@@ -2,6 +2,7 @@
 from typing import Tuple, Optional
 import pickle
 import numpy as np
+import cv2
 import rospy
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import Quaternion, PoseArray
@@ -99,7 +100,16 @@ def particles_to_pose_array(particles: np.ndarray) -> PoseArray:
 
     return PoseArray(poses=[particle_to_pose(p) for p in particles])
 
+def publish_image(map_png_file:str, cv_bridge:CvBridge, pub: rospy.Publisher) -> None:
+    """
+    Load the given image file and publish using the given publisher
+    """
+    img = cv2.imread(map_png_file)
+    img_msg = cv_bridge.cv2_to_imgmsg(img, 'bgr8')
+    pub.publish(img_msg)
+    
 
+    
 class CarpetLocaliser():
     """
     Interface between incoming ROS messages (odom and camera image) and
@@ -131,6 +141,13 @@ class CarpetLocaliser():
             PoseArray,
             queue_size=10,
         )
+
+        # publish the carpet map on a latched image topic
+        self.map_pub = rospy.Publisher("carpet_map", 
+                                       Image,
+                                       latch=True,
+                                       queue_size=10)
+        publish_image(map_png_file, self.cv_bridge, self.map_pub)
 
     def __del__(self):
         if self.log_inputs:

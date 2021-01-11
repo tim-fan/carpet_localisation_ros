@@ -55,7 +55,6 @@ TODO: launch localisation and RViz
 ### TODO
 * publish map-> odom tf (use fake localisation?)
 * find a better way of determining current pose from particle cloud (mean is biased by outliers. MAP? clustering?)
-* visualise map in rviz (try [textured quads?](https://github.com/MohitShridhar/rviz_textured_quads) or [polygon array?](https://jsk-visualization.readthedocs.io/en/latest/jsk_rviz_plugins/plugins/polygon_array.html) )
 * support particle filter seed/reset
 * realworld test
 * expose particle filter config params (n_particles, noise params, update thresholds)

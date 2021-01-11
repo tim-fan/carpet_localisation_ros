@@ -7,3 +7,7 @@ repositories:
     type: git
     url: https://github.com/AutonomyLab/create_robot.git
     version: melodic
+  rviz_textured_quads:
+    type: git
+    url: https://github.com/lucasw/rviz_textured_quads.git
+    version: image_topic
