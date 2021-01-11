@@ -54,6 +54,7 @@ TODO: launch localisation and RViz
 
 ### TODO
 * publish map-> odom tf (use fake localisation?)
+* published carpet camera image with classification label to image topic
 * find a better way of determining current pose from particle cloud (mean is biased by outliers. MAP? clustering?)
 * support particle filter seed/reset
 * realworld test
