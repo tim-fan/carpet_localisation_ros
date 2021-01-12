@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
     <!-- use a tf publisher to publish the position of the carpet map (just used for visualisation purposes) -->
-    <node name="map_center_tf_pub" pkg="tf" type="static_transform_publisher" args="10 10 -0.05 0 0 0 map map_center 1000"/>
-    
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find carpet_localisation)/cfg/carpet_localisation.rviz"/>
+    <node name="map_center_tf_pub" pkg="tf" type="static_transform_publisher" args="10 10 -0.05 3.14159265359 3.14159265359 0 map map_center 1000" />
+
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find carpet_localisation)/cfg/carpet_localisation.rviz" />
 </launch>
