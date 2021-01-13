@@ -12,7 +12,8 @@ from cv_bridge import CvBridge
 import message_filters
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from carpet_color_classification import CarpetColorClassifier
-from cbl_particle_filter.filter import CarpetBasedParticleFilter, Pose, OdomMeasurement, ColorMeasurement
+from cbl_particle_filter.filter import CarpetBasedParticleFilter, Pose, OdomMeasurement
+import cbl_particle_filter.colors as colors
 from cbl_particle_filter.carpet_map import load_map_from_png
 
 
@@ -100,16 +101,17 @@ def particles_to_pose_array(particles: np.ndarray) -> PoseArray:
 
     return PoseArray(poses=[particle_to_pose(p) for p in particles])
 
-def publish_image(map_png_file:str, cv_bridge:CvBridge, pub: rospy.Publisher) -> None:
+
+def publish_image(map_png_file: str, cv_bridge: CvBridge,
+                  pub: rospy.Publisher) -> None:
     """
     Load the given image file and publish using the given publisher
     """
     img = cv2.imread(map_png_file)
     img_msg = cv_bridge.cv2_to_imgmsg(img, 'bgr8')
     pub.publish(img_msg)
-    
 
-    
+
 class CarpetLocaliser():
     """
     Interface between incoming ROS messages (odom and camera image) and
@@ -143,7 +145,7 @@ class CarpetLocaliser():
         )
 
         # publish the carpet map on a latched image topic
-        self.map_pub = rospy.Publisher("carpet_map", 
+        self.map_pub = rospy.Publisher("carpet_map",
                                        Image,
                                        latch=True,
                                        queue_size=10)
@@ -181,8 +183,8 @@ class CarpetLocaliser():
             rospy.loginfo(f"odom: {odom_delta}")
 
             # determine detected color
-            color_measurement, color_name = self._classify_image_color(img_msg)
-            rospy.loginfo(f"detected color: {color_name}")
+            color = self._classify_image_color(img_msg)
+            rospy.loginfo(f"detected color: {color.name}")
 
             # get ground truth pose if provided
             if ground_truth_state:
@@ -192,8 +194,7 @@ class CarpetLocaliser():
                 ground_truth_pose = None
 
             # perform update
-            self.particle_filter.update(odom_delta, color_measurement,
-                                        ground_truth_pose)
+            self.particle_filter.update(odom_delta, color, ground_truth_pose)
 
             # create and publish odom msg representing current pose
             current_pose = Odometry()
@@ -212,19 +213,15 @@ class CarpetLocaliser():
 
             self.previous_odom = current_odom
 
-    def _classify_image_color(self,
-                              img_msg: Image) -> Tuple[ColorMeasurement, str]:
+    def _classify_image_color(self, img_msg: Image) -> colors.Color:
         """
-        invoke classifier on given image, returning color index and name (string)
+        invoke classifier on given image, returning color 
         """
         cv_image = self.cv_bridge.imgmsg_to_cv2(img_msg,
                                                 desired_encoding='bgr8')
-        color_index, color_name = self.color_classifier.classify(cv_image)
+        _, color_name = self.color_classifier.classify(cv_image)
 
-        # set index to None if classification failed
-        if color_name == "UNCLASSIFIED":
-            color_index = None
-        return ColorMeasurement(color_index), color_name
+        return colors.color_from_name[color_name]
 
 
 def run_localisation():
