@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- playback a log, saving images from a given image topic -->
+    <!-- used for creating training datasets for color classifier -->
+    <!-- images are saved in /tmp/ -->
+    <arg name="bag_file" doc="bag to play back" />
+    <arg name="playback_rate" default="1" doc="speed at which to run bag playback"/>
+    <arg name="image_topic" default="/carpet_cam/image_raw"/>
+    <arg name="visualise" default="true" doc="if true, run rqt_image_view during the playback"/>
+
+    <param name="use_sim_time" value="true"/>
+
+    <node name="bag_player" pkg="rosbag" type="play" args="$(arg bag_file) -r $(arg playback_rate) --clock" required="true"/>
+    <node name="image_saver" pkg="image_view" type="image_saver">
+        <param name="filename_format" value="/tmp/image_%06i.png"/>
+        <remap from="image" to="$(arg image_topic)"/>
+    </node>
+    <node name="rqt_image_view" pkg="rqt_image_view" type="rqt_image_view" args="$(arg image_topic)" if="$(arg visualise)"/>
+
+</launch>
