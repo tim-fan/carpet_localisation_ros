@@ -96,7 +96,7 @@ def particles_to_pose_array(particles: np.ndarray) -> PoseArray:
     Convert particle filter particles into a ROS pose array message
     """
     def particle_to_pose(particle: np.array) -> Pose:
-        return pose_to_pose_msg(Pose(*particle))
+        return pose_to_pose_msg(Pose(*particle[0:3]))
 
     return PoseArray(poses=[particle_to_pose(p) for p in particles])
 
