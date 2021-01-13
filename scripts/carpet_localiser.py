@@ -112,6 +112,30 @@ def publish_image(map_png_file: str, cv_bridge: CvBridge,
     pub.publish(img_msg)
 
 
+def write_color_name_on_cv_img(cv_img: np.ndarray,
+                               color: colors.Color) -> np.ndarray:
+    """
+    Write the name of the given color onto the image
+    """
+    # define text colors
+    color_index_to_bgr_tuple = {
+        colors.BLACK.index: (0, 0, 0),
+        colors.LIGHT_BLUE.index: (255, 204, 51),
+        colors.BEIGE.index: (169, 214, 213),
+        colors.DARK_BLUE.index: (204, 51, 0),
+        colors.UNCLASSIFIED.index: (100, 100, 100)
+    }
+    cv2.rectangle(cv_img, (20, 440), (620, 300), (255, 255, 255),
+                  -1)  #background
+    return cv2.putText(img=cv_img,
+                       text=color.name,
+                       org=(20, 400),
+                       fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                       fontScale=3,
+                       color=color_index_to_bgr_tuple[color.index],
+                       thickness=20)
+
+
 class CarpetLocaliser():
     """
     Interface between incoming ROS messages (odom and camera image) and
@@ -138,11 +162,16 @@ class CarpetLocaliser():
         self.pose_pub = rospy.Publisher("current_pose",
                                         Odometry,
                                         queue_size=10)
+
         self.particle_pub = rospy.Publisher(
             "particlecloud",
             PoseArray,
             queue_size=10,
         )
+
+        self.classified_image_pub = rospy.Publisher("classified_image",
+                                                    Image,
+                                                    queue_size=10)
 
         # publish the carpet map on a latched image topic
         self.map_pub = rospy.Publisher("carpet_map",
@@ -220,8 +249,14 @@ class CarpetLocaliser():
         cv_image = self.cv_bridge.imgmsg_to_cv2(img_msg,
                                                 desired_encoding='bgr8')
         _, color_name = self.color_classifier.classify(cv_image)
+        color = colors.color_from_name[color_name]
 
-        return colors.color_from_name[color_name]
+        # republish the image with the classification written on it, for visualisation/debug
+        cv_image = write_color_name_on_cv_img(cv_image, color)
+        img_msg = self.cv_bridge.cv2_to_imgmsg(cv_image, encoding='bgr8')
+        self.classified_image_pub.publish(img_msg)
+
+        return color
 
 
 def run_localisation():
