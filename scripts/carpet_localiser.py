@@ -7,14 +7,14 @@ import rospy
 from sensor_msgs.msg import Image
 from geometry_msgs.msg import Quaternion, PoseArray
 from geometry_msgs.msg import Pose as PoseMsg
-from nav_msgs.msg import Odometry
+from nav_msgs.msg import Odometry, OccupancyGrid
 from cv_bridge import CvBridge
 import message_filters
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from carpet_color_classification import CarpetColorClassifier
 from cbl_particle_filter.filter import CarpetBasedParticleFilter, Pose, OdomMeasurement
 import cbl_particle_filter.colors as colors
-from cbl_particle_filter.carpet_map import load_map_from_png
+from cbl_particle_filter.carpet_map import load_map_from_png, CarpetMap
 
 
 def yaw_from_quaternion_msg(q: Quaternion) -> float:
@@ -136,6 +136,28 @@ def write_color_name_on_cv_img(cv_img: np.ndarray,
                        thickness=20)
 
 
+def publish_carpet_map_outline(carpet_map: CarpetMap, pub: rospy.Publisher):
+    """
+    Publish an occupancy grid from the given carpet map.
+    The occupancy grid will show clear space where there is carpet, otherwise
+    occupied space
+    """
+    o_grid = OccupancyGrid()
+    o_grid.header.frame_id = "map"
+    color_indices = [color.index for color in colors.COLORS]
+    o_grid.data = [
+        0 if elem in color_indices else 100
+        for elem in carpet_map.grid.flatten()
+    ]
+    height, width = carpet_map.grid.shape
+    o_grid.info.height = height
+    o_grid.info.width = width
+    o_grid.info.resolution = carpet_map.cell_size
+    o_grid.info.origin.orientation.w = 1
+
+    pub.publish(o_grid)
+
+
 class CarpetLocaliser():
     """
     Interface between incoming ROS messages (odom and camera image) and
@@ -174,11 +196,21 @@ class CarpetLocaliser():
                                                     queue_size=10)
 
         # publish the carpet map on a latched image topic
-        self.map_pub = rospy.Publisher("carpet_map",
-                                       Image,
-                                       latch=True,
-                                       queue_size=10)
+        self.map_pub = rospy.Publisher(
+            "carpet_map",
+            Image,
+            latch=True,
+            queue_size=10,
+        )
         publish_image(map_png_file, self.cv_bridge, self.map_pub)
+
+        self.occupancy_pub = rospy.Publisher(
+            "carpet_map_outline",
+            OccupancyGrid,
+            latch=True,
+            queue_size=10,
+        )
+        publish_carpet_map_outline(carpet, self.occupancy_pub)
 
     def __del__(self):
         if self.log_inputs:
