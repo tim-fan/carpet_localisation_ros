@@ -7,6 +7,10 @@ repositories:
     type: git
     url: https://github.com/AutonomyLab/create_robot.git
     version: melodic
+  map_to_odom_publisher:
+    type: git
+    url: git@github.com:tim-fan/map_to_odom_publisher.git
+    version: main
   rviz_textured_quads:
     type: git
     url: https://github.com/lucasw/rviz_textured_quads.git
