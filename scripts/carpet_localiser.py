@@ -147,7 +147,7 @@ def publish_carpet_map_outline(carpet_map: CarpetMap, pub: rospy.Publisher):
     color_indices = [color.index for color in colors.COLORS]
     o_grid.data = [
         0 if elem in color_indices else 100
-        for elem in carpet_map.grid.flatten()
+        for elem in np.flipud(carpet_map.grid).flatten()
     ]
     height, width = carpet_map.grid.shape
     o_grid.info.height = height
