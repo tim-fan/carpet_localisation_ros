@@ -3,14 +3,14 @@
   <!-- run localisation node parameterised for carpet simulation world -->
   <arg name="log_inputs" default="false" doc="set true to record particle filter inputs for offline playback" />
   <node name="carpet_localisation" pkg="carpet_localisation" type="carpet_localiser.py" output="screen">
-    <param name="map_png_file" value="$(find carpet_localisation)/gazebo/models/carpet/materials/textures/Carpet.png" />
+    <param name="map_png_file" value="$(find carpet_localisation)/cfg/office_map.png" />
     <param name="map_cell_size" value="0.5" />
-    <param name="classifier_param_file" value="$(find carpet_localisation)/gazebo/carpet_world_gmm_model/gmm_params.json" />
-    <param name="subscribe_ground_truth" value="true" />
+    <param name="classifier_param_file" value="$(find carpet_localisation)/cfg/office_gmm_params.json" />
+    <param name="subscribe_ground_truth" value="false" />
     <param name="log_inputs" value="$(arg log_inputs)" />
     <remap from="image" to="/carpet_cam/image_raw" />
   </node>
 
     <!-- use a tf publisher to publish the position of the carpet map (just used for visualisation purposes) -->
-    <node name="map_center_tf_pub" pkg="tf" type="static_transform_publisher" args="10 10 -0.05 3.14159265359 3.14159265359 0 map map_center 1000" />
+    <node name="map_center_tf_pub" pkg="tf" type="static_transform_publisher" args="8 7.25 -0.05 3.14159265359 3.14159265359 0 map map_center 1000" />
 </launch>
