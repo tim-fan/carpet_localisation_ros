@@ -12,7 +12,7 @@ from cv_bridge import CvBridge
 import message_filters
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from carpet_color_classification import CarpetColorClassifier
-from cbl_particle_filter.filter import CarpetBasedParticleFilter, Pose, OdomMeasurement
+from cbl_particle_filter.filter import CarpetBasedParticleFilter, Pose, OdomMeasurement, add_poses
 import cbl_particle_filter.colors as colors
 from cbl_particle_filter.carpet_map import load_map_from_png, CarpetMap
 
@@ -227,6 +227,12 @@ class CarpetLocaliser():
         Can optionally provide ground truth for logging purposes
         """
 
+        # prepare output pose message (odom)
+        current_pose = Odometry()
+        current_pose.header.frame_id = "map"
+        current_pose.header.stamp = img_msg.header.stamp
+        current_pose.twist = odom_msg.twist
+
         # determine odom delta since last update
         current_odom = odom_msg_to_measurement(odom_msg)
         odom_delta = compute_odom_delta(current_odom, self.previous_odom)
@@ -257,14 +263,9 @@ class CarpetLocaliser():
             # perform update
             self.particle_filter.update(odom_delta, color, ground_truth_pose)
 
-            # create and publish odom msg representing current pose
-            current_pose = Odometry()
+            # get current pose from the particle filter
             current_pose.pose.pose = pose_to_pose_msg(
                 self.particle_filter.get_current_pose())
-            current_pose.header.frame_id = "map"
-            current_pose.header.stamp = img_msg.header.stamp
-            current_pose.twist = odom_msg.twist
-            self.pose_pub.publish(current_pose)
 
             # also publish current particles
             pose_array = particles_to_pose_array(
@@ -273,6 +274,32 @@ class CarpetLocaliser():
             self.particle_pub.publish(pose_array)
 
             self.previous_odom = current_odom
+
+        else:
+            # set current pose as particle filter pose at last update
+            # plus accumulated odom since then
+            pf_pose = self.particle_filter.get_current_pose()
+
+            updated_pose_array = add_poses(
+                current_poses=np.array([[
+                    pf_pose.x,
+                    pf_pose.y,
+                    pf_pose.heading,
+                ]]),
+                pose_increments=np.array([[
+                    odom_delta.dx,
+                    odom_delta.dy,
+                    odom_delta.dheading,
+                ]])
+            )[0] # yapf: disable
+
+            updated_pose = Pose(x=updated_pose_array[0],
+                                y=updated_pose_array[1],
+                                heading=updated_pose_array[2])
+            current_pose.pose.pose = pose_to_pose_msg(updated_pose)
+
+        # publish current location
+        self.pose_pub.publish(current_pose)
 
     def _classify_image_color(self, img_msg: Image) -> colors.Color:
         """
@@ -323,11 +350,6 @@ def run_localisation():
     time_synchronizer = message_filters.ApproximateTimeSynchronizer(
         subs, 10, 0.2)
     time_synchronizer.registerCallback(localiser.localisation_update)
-
-    def img_callback(img_msg: Image):
-        cv_image = cv_bridge.imgmsg_to_cv2(img_msg, desired_encoding='bgr8')
-        color_index, color_name = classifier.classify(cv_image)
-        rospy.loginfo(f"detected color: {color_name}")
 
     try:
         rospy.spin()
