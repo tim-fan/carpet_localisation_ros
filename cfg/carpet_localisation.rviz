@@ -61,12 +61,12 @@ Visualization Manager:
       Reference Frame: <Fixed Frame>
       Value: true
     - Class: rviz_textured_quads/MeshDisplayCustom
-      Enabled: false
+      Enabled: true
       Image Topic: /carpet_map
       Meters per pixel: 0.009999999776482582
       Name: /carpet_map
       Quad Frame: map_center
-      Value: false
+      Value: true
     - Alpha: 0.699999988079071
       Class: rviz/Map
       Color Scheme: map
@@ -203,7 +203,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: 0
+      Angle: -0.009999984875321388
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -213,10 +213,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 30.121747970581055
+      Scale: 33.019466400146484
       Target Frame: <Fixed Frame>
-      X: 9.925372123718262
-      Y: 7.202200889587402
+      X: 12.792213439941406
+      Y: 10.347168922424316
     Saved: ~
 Window Geometry:
   /classified_image:

@@ -12,5 +12,5 @@
   </node>
 
     <!-- use a tf publisher to publish the position of the carpet map (just used for visualisation purposes) -->
-    <node name="map_center_tf_pub" pkg="tf" type="static_transform_publisher" args="8 7.25 -0.05 3.14159265359 3.14159265359 0 map map_center 1000" />
+    <node name="map_center_tf_pub" pkg="tf" type="static_transform_publisher" args="9.75 10 -0.05 3.14159265359 3.14159265359 0 map map_center 1000" />
 </launch>
