@@ -22,7 +22,7 @@ mkdir -p catkin_ws/src && cd catkin_ws/src
 curl https://raw.githubusercontent.com/tim-fan/carpet_localisation_ros/main/workspace.repos | vcs import
 
 # install rosdeps:
-rosdep install --from-paths carpet_localisation/ create_robot/create_description/ --ignore-src --rosdistro noetic
+rosdep install --from-paths carpet_localisation/ create_robot/create_description/ map_to_odom_publisher/ rviz_textured_quads/ --ignore-src --rosdistro noetic
 
 # disable buiding packages which fail on noetic:
 touch create_robot/create_bringup/CATKIN_IGNORE
