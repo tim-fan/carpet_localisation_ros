@@ -125,15 +125,15 @@ def write_color_name_on_cv_img(cv_img: np.ndarray,
         colors.DARK_BLUE.index: (204, 51, 0),
         colors.UNCLASSIFIED.index: (100, 100, 100)
     }
-    cv2.rectangle(cv_img, (20, 440), (620, 300), (255, 255, 255),
+    cv2.rectangle(cv_img, (10, 220), (310, 150), (255, 255, 255),
                   -1)  #background
     return cv2.putText(img=cv_img,
                        text=color.name,
-                       org=(20, 400),
+                       org=(10, 200),
                        fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-                       fontScale=3,
+                       fontScale=1.6,
                        color=color_index_to_bgr_tuple[color.index],
-                       thickness=20)
+                       thickness=10)
 
 
 def publish_carpet_map_outline(carpet_map: CarpetMap, pub: rospy.Publisher):
