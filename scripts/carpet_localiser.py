@@ -4,8 +4,9 @@ import pickle
 import numpy as np
 import cv2
 import rospy
+from std_msgs.msg import Header
 from sensor_msgs.msg import Image
-from geometry_msgs.msg import Quaternion, PoseArray
+from geometry_msgs.msg import Quaternion, PoseArray, PoseWithCovarianceStamped
 from geometry_msgs.msg import Pose as PoseMsg
 from nav_msgs.msg import Odometry, OccupancyGrid
 from cv_bridge import CvBridge
@@ -172,12 +173,14 @@ class CarpetLocaliser():
         self.update_distance_threshold = 0.2  # m
         self.update_rotation_threshold = 0.1  # rad
 
+        resample_proportion = 0
+
         self.color_classifier = CarpetColorClassifier(classifier_param_file)
         self.log_inputs = log_inputs
 
         carpet = load_map_from_png(map_png_file, map_cell_size)
 
-        self.particle_filter = CarpetBasedParticleFilter(carpet, log_inputs)
+        self.particle_filter = CarpetBasedParticleFilter(carpet, log_inputs, resample_proportion=resample_proportion)
         self.cv_bridge = CvBridge()
         self.previous_odom = None
 
@@ -268,10 +271,7 @@ class CarpetLocaliser():
                 self.particle_filter.get_current_pose())
 
             # also publish current particles
-            pose_array = particles_to_pose_array(
-                self.particle_filter.get_particles())
-            pose_array.header = current_pose.header
-            self.particle_pub.publish(pose_array)
+            self._publish_particles(header=current_pose.header)
 
             self.previous_odom = current_odom
 
@@ -300,6 +300,22 @@ class CarpetLocaliser():
 
         # publish current location
         self.pose_pub.publish(current_pose)
+
+    def seed(self, pose_msg:PoseWithCovarianceStamped) -> None:
+        seed_pose = Pose(
+            x=pose_msg.pose.pose.position.x,
+            y=pose_msg.pose.pose.position.y,
+            heading=yaw_from_quaternion_msg(pose_msg.pose.pose.orientation),
+        )
+        self.particle_filter.seed(seed_pose)
+        self.previous_odom = None
+        self._publish_particles(header=pose_msg.header)
+
+    def _publish_particles(self, header:Header) -> None:
+            pose_array = particles_to_pose_array(
+                self.particle_filter.get_particles())
+            pose_array.header = header
+            self.particle_pub.publish(pose_array)
 
     def _classify_image_color(self, img_msg: Image) -> colors.Color:
         """
@@ -350,6 +366,8 @@ def run_localisation():
     time_synchronizer = message_filters.ApproximateTimeSynchronizer(
         subs, 10, 0.2)
     time_synchronizer.registerCallback(localiser.localisation_update)
+
+    init_pose_sub = rospy.Subscriber("initialpose", PoseWithCovarianceStamped, localiser.seed )
 
     try:
         rospy.spin()
