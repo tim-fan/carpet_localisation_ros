@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+
+<!-- playback a bag containing odom and carpet cam images -->
+<!-- assumes tf was not logged -->
+
+<launch>
+  <arg name="urdf_file" doc="urdf file for robot description" />
+  <arg name="bag_file" doc="file to play back" />
+
+  <param name="use_sim_time" value="true" />
+
+  <!-- publish robot static tf -->
+  <param name="robot_description" command="xacro $(arg urdf_file)" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen" />
+
+  <!-- publish odom tf -->
+  <node name="odom_to_tf" pkg="carpet_localisation" type="odom_to_tf.py"/>
+
+  <!-- play bag -->
+  <node name="bag_play" pkg="rosbag" type="play" args="--clock --loop $(arg bag_file)" output="screen"/>
+</launch>
