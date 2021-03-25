@@ -3,11 +3,13 @@
   <!-- run localisation node parameterised for carpet simulation world -->
   <arg name="log_inputs" default="false" doc="set true to record particle filter inputs for offline playback" />
   <arg name="classifier_param_file" doc="parameter file for carpet classifier" default="$(find carpet_localisation)/cfg/office_gmm_params.json" />
+  <arg name="subscribe_ground_truth" default="false" doc="set true to subscribe to ground truth pose, for logging purposes"/>
+  
   <node name="carpet_localisation" pkg="carpet_localisation" type="carpet_localiser.py" output="screen">
     <param name="map_png_file" value="$(find carpet_localisation)/cfg/office_map.png" />
     <param name="map_cell_size" value="0.5" />
     <param name="classifier_param_file" value="$(arg classifier_param_file)" />
-    <param name="subscribe_ground_truth" value="false" />
+    <param name="subscribe_ground_truth" value="$(arg subscribe_ground_truth)" />
     <param name="log_inputs" value="$(arg log_inputs)" />
     <remap from="image" to="/carpet_cam/image_raw" />
   </node>
