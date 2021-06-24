@@ -6,7 +6,7 @@
         "2": "DARK_BLUE",
         "4": "UNCLASSIFIED"
     },
-    "unclassified_score_threshold": -15,
+    "unclassified_score_threshold": -99999,
     "gmm_weights": [
         0.21025641025641026,
         0.28376068376068375,
