@@ -11,7 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
 # setup catkin venv, following
 # https://github.com/locusrobotics/catkin_virtualenv/blob/master/README.md
 catkin_generate_virtualenv(
-    PYTHON_INTERPRETER python3.8  # Noetic/Focal
+    PYTHON_INTERPRETER python3.6  # Melodic/Bionic
 )
 
 

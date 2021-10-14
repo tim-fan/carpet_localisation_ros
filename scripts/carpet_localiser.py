@@ -173,14 +173,23 @@ class CarpetLocaliser():
         self.update_distance_threshold = 0.2  # m
         self.update_rotation_threshold = 0.1  # rad
 
-        resample_proportion = 0
-
         self.color_classifier = CarpetColorClassifier(classifier_param_file)
         self.log_inputs = log_inputs
 
         carpet = load_map_from_png(map_png_file, map_cell_size)
 
-        self.particle_filter = CarpetBasedParticleFilter(carpet, log_inputs, resample_proportion=resample_proportion)
+        # create particle filter using params based on
+        # https://github.com/tim-fan/carpet_localisation/blob/master/notebooks/PF%20Parameter%20Optimisation%20-%205%20Office%20Loops.ipynb
+        # TODO: move params to yaml file
+        self.particle_filter = CarpetBasedParticleFilter(
+            carpet,
+            log_inputs,
+            resample_proportion=0,
+            weight_fn_p=0.9,
+            odom_pos_noise=0.01,
+            odom_heading_noise=0.02,
+            n_particles=500,
+            )
         self.cv_bridge = CvBridge()
         self.previous_odom = None
 
