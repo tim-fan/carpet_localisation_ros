@@ -4,6 +4,8 @@ A ROS package for running [carpet localisation](https://github.com/tim-fan/carpe
 
 Includes gazebo simulation of a representative carpet world for testing.
 
+For an overview of the broader project, see [the wiki](https://github.com/tim-fan/carpet_localisation/wiki/Carpet-Localisation).
+
 ![roomba on carpet](doc/roomba_on_carpet.jpg)
 
 **Figure**: Roomba in target localisation enviroment. Localisation is achieved with reference to a map of the carpet color pattern throughout the office.
